@@ -68,7 +68,7 @@ class AW9523:
 
     def __init__(self, i2c_bus, address=_AW9523_DEFAULT_ADDR, reset=True):
         self.i2c_device = i2c_device.I2CDevice(i2c_bus, address)
-
+        self._buffer = bytearray(2)     
         if self._chip_id != 0x23:
             raise AttributeError("Cannot find a AW9523")
         if reset:
@@ -79,7 +79,24 @@ class AW9523:
 
     def reset(self):
         self._reset_reg = 0
-        
+
+    def set_constant_current(self, pin, value):
+        # See Table 13. 256 step dimming control register
+        if 0 <= pin <= 7:
+            self._buffer[0] = 0x24 + pin
+        elif 8 <= pin <= 11:
+            self._buffer[0] = 0x20 + pin - 8
+        elif 12 <= pin <= 15:
+            self._buffer[0] = 0x2C + pin - 12
+        else:
+            raise ValueError("Pin must be 0 to 15")
+
+        # set value
+        if not (0 <= value <= 255):
+            raise ValueError("Value must be 0 to 255")
+        self._buffer[1] = value
+        with self.i2c_device as i2c:
+            i2c.write(self._buffer)
 
     @property
     def interrupt_enables(self):
