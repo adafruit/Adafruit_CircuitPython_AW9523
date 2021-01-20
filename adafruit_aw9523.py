@@ -36,18 +36,18 @@ __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_AW9523.git"
 
 _AW9523_DEFAULT_ADDR = const(0x58)
-_AW9523_REG_CHIPID = const(0x10)     # Register for hardcode chip ID
+_AW9523_REG_CHIPID = const(0x10)  # Register for hardcode chip ID
 _AW9523_REG_SOFTRESET = const(0x7F)  # Register for soft resetting
-_AW9523_REG_INPUT0 = const(0x00)     # Register for reading input values
-_AW9523_REG_OUTPUT0 = const(0x02)    # Register for writing output values
-_AW9523_REG_CONFIG0 = const(0x04)    # Register for configuring direction
-_AW9523_REG_INTENABLE0 = const(0x06) # Register for enabling interrupt
-_AW9523_REG_GCR = const(0x11)        # Register for general configuration
-_AW9523_REG_LEDMODE = const(0x12)    # Register for configuring const current
+_AW9523_REG_INPUT0 = const(0x00)  # Register for reading input values
+_AW9523_REG_OUTPUT0 = const(0x02)  # Register for writing output values
+_AW9523_REG_CONFIG0 = const(0x04)  # Register for configuring direction
+_AW9523_REG_INTENABLE0 = const(0x06)  # Register for enabling interrupt
+_AW9523_REG_GCR = const(0x11)  # Register for general configuration
+_AW9523_REG_LEDMODE = const(0x12)  # Register for configuring const current
 
 
 class AW9523:
-    
+
     _chip_id = ROUnaryStruct(_AW9523_REG_CHIPID, "<B")
     _reset_reg = UnaryStruct(_AW9523_REG_SOFTRESET, "<B")
 
@@ -64,18 +64,17 @@ class AW9523:
 
     # Whether port 0 is push-pull
     port0_push_pull = RWBit(_AW9523_REG_GCR, 4)
-    
 
     def __init__(self, i2c_bus, address=_AW9523_DEFAULT_ADDR, reset=True):
         self.i2c_device = i2c_device.I2CDevice(i2c_bus, address)
-        self._buffer = bytearray(2)     
+        self._buffer = bytearray(2)
         if self._chip_id != 0x23:
             raise AttributeError("Cannot find a AW9523")
         if reset:
             self.reset()
-            self.port0_push_pull = True # pushpull output
-            self.interrupt_enables = 0x0000 # no IRQ
-            self.directions = 0x0000 # all inputs!
+            self.port0_push_pull = True  # pushpull output
+            self.interrupt_enables = 0x0000  # no IRQ
+            self.directions = 0x0000  # all inputs!
 
     def reset(self):
         self._reset_reg = 0
@@ -104,14 +103,14 @@ class AW9523:
         """
         assert 0 <= pin <= 15
         return DigitalInOut(pin, self)
-    
+
     @property
     def interrupt_enables(self):
         return ~self._interrupt_enables & 0xFFFF
 
     @interrupt_enables.setter
     def interrupt_enables(self, enables):
-       self._interrupt_enables = ~enables & 0xFFFF
+        self._interrupt_enables = ~enables & 0xFFFF
 
     @property
     def directions(self):
@@ -119,7 +118,7 @@ class AW9523:
 
     @directions.setter
     def directions(self, dirs):
-       self._directions = ((~dirs) & 0xFFFF)
+        self._directions = (~dirs) & 0xFFFF
 
     @property
     def LED_modes(self):
@@ -127,7 +126,7 @@ class AW9523:
 
     @LED_modes.setter
     def LED_modes(self, modes):
-       self._LED_modes = ~modes & 0xFFFF
+        self._LED_modes = ~modes & 0xFFFF
 
 
 # SPDX-FileCopyrightText: 2017 Tony DiCola for Adafruit Industries
@@ -170,8 +169,7 @@ class DigitalInOut:
     """
 
     def __init__(self, pin_number, aw):
-        """Specify the pin number of the AW9523 0..15, and instance.
-        """
+        """Specify the pin number of the AW9523 0..15, and instance."""
         self._pin = pin_number
         self._aw = aw
 
@@ -226,7 +224,7 @@ class DigitalInOut:
     def direction(self, val):
         if val == digitalio.Direction.INPUT:
             self._aw.directions = _clear_bit(self._aw.directions, self._pin)
-            
+
         elif val == digitalio.Direction.OUTPUT:
             self._aw.directions = _enable_bit(self._aw.directions, self._pin)
         else:

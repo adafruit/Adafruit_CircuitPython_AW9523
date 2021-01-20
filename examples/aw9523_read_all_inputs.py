@@ -16,5 +16,5 @@ aw.directions = 0x0000
 
 while True:
     # read all input bits and print them out as binary 0/1
-    print('Inputs: {:016b}'.format(aw.inputs))
+    print("Inputs: {:016b}".format(aw.inputs))
     time.sleep(0.1)

@@ -19,6 +19,6 @@ n = 0
 while True:
     for pin in range(16):
         # every LED is 'offset' by 16 counts so they dont all pulse together
-        aw.set_constant_current(pin, (pin*16 + n) % 256)
+        aw.set_constant_current(pin, (pin * 16 + n) % 256)
     # n increments to increase the current from 0 to 255, then wraps around
-    n = (n+1) % 256
+    n = (n + 1) % 256

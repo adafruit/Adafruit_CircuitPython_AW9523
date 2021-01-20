@@ -10,10 +10,10 @@ import digitalio
 i2c = board.I2C()
 aw = adafruit_aw9523.AW9523(i2c)
 
-led_pin = aw.get_pin(0)   # LED on AW9523 io 0
-button_pin = aw.get_pin(1) # Button on AW io 1
+led_pin = aw.get_pin(0)  # LED on AW9523 io 0
+button_pin = aw.get_pin(1)  # Button on AW io 1
 
-# LED is an output, initialize to high 
+# LED is an output, initialize to high
 led_pin.switch_to_output(value=True)
 # Button is an input, note pull-ups are not supported!
 button_pin.direction = digitalio.Direction.INPUT
