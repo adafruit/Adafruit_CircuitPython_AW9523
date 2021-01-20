@@ -98,6 +98,13 @@ class AW9523:
         with self.i2c_device as i2c:
             i2c.write(self._buffer)
 
+    def get_pin(self, pin):
+        """Convenience function to create an instance of the DigitalInOut class
+        pointing at the specified pin of this AW9523 device.
+        """
+        assert 0 <= pin <= 15
+        return DigitalInOut(pin, self)
+    
     @property
     def interrupt_enables(self):
         return ~self._interrupt_enables & 0xFFFF
@@ -121,3 +128,117 @@ class AW9523:
     @LED_modes.setter
     def LED_modes(self, modes):
        self._LED_modes = ~modes & 0xFFFF
+
+
+# SPDX-FileCopyrightText: 2017 Tony DiCola for Adafruit Industries
+# SPDX-FileCopyrightText: 2019 Carter Nelson
+#
+# SPDX-License-Identifier: MIT
+
+"""
+`digital_inout`
+====================================================
+
+Digital input/output of the MCP230xx.
+
+* Author(s): Tony DiCola
+"""
+
+import digitalio
+
+# Internal helpers to simplify setting and getting a bit inside an integer.
+def _get_bit(val, bit):
+    return val & (1 << bit) > 0
+
+
+def _enable_bit(val, bit):
+    return val | (1 << bit)
+
+
+def _clear_bit(val, bit):
+    return val & ~(1 << bit)
+
+
+class DigitalInOut:
+    """Digital input/output of the AW9523.  The interface is exactly the
+    same as the digitalio.DigitalInOut class, however:
+
+      * AW9523 family does not support pull-up or -down resistors
+
+    Exceptions will be thrown when attempting to set unsupported pull
+    configurations.
+    """
+
+    def __init__(self, pin_number, aw):
+        """Specify the pin number of the AW9523 0..15, and instance.
+        """
+        self._pin = pin_number
+        self._aw = aw
+
+    # kwargs in switch functions below are _necessary_ for compatibility
+    # with DigitalInout class (which allows specifying pull, etc. which
+    # is unused by this class).  Do not remove them, instead turn off pylint
+    # in this case.
+    # pylint: disable=unused-argument
+    def switch_to_output(self, value=False, **kwargs):
+        """Switch the pin state to a digital output with the provided starting
+        value (True/False for high or low, default is False/low).
+        """
+        self.direction = digitalio.Direction.OUTPUT
+        self.value = value
+
+    def switch_to_input(self, pull=None, invert_polarity=False, **kwargs):
+        """Switch the pin state to a digital input with the provided starting
+        pull-up resistor state (optional, no pull-up by default) and input polarity.  Note that
+        pull-down resistors are NOT supported!
+        """
+        self.direction = digitalio.Direction.INPUT
+        self.pull = pull
+        self.invert_polarity = invert_polarity
+
+    # pylint: enable=unused-argument
+
+    @property
+    def value(self):
+        """The value of the pin, either True for high or False for
+        low.  Note you must configure as an output or input appropriately
+        before reading and writing this value.
+        """
+        return _get_bit(self._aw.inputs, self._pin)
+
+    @value.setter
+    def value(self, val):
+        if val:
+            self._aw.outputs = _enable_bit(self._aw.outputs, self._pin)
+        else:
+            self._aw.outputs = _clear_bit(self._aw.outputs, self._pin)
+
+    @property
+    def direction(self):
+        """The direction of the pin, either True for an input or
+        False for an output.
+        """
+        if _get_bit(self._aw.direction, self._pin):
+            return digitalio.Direction.INPUT
+        return digitalio.Direction.OUTPUT
+
+    @direction.setter
+    def direction(self, val):
+        if val == digitalio.Direction.INPUT:
+            self._aw.directions = _clear_bit(self._aw.directions, self._pin)
+            
+        elif val == digitalio.Direction.OUTPUT:
+            self._aw.directions = _enable_bit(self._aw.directions, self._pin)
+        else:
+            raise ValueError("Expected INPUT or OUTPUT direction!")
+
+    @property
+    def pull(self):
+        """
+        Pull-down resistors are NOT supported!
+        """
+        raise ValueError("Pull-up/pull-down resistors not supported.")
+
+    @pull.setter
+    def pull(self, val):
+        raise ValueError("Pull-up/pull-down resistors not supported.")
