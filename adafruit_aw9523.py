@@ -25,8 +25,7 @@ Implementation Notes
 * Adafruit's Register library: https://github.com/adafruit/Adafruit_CircuitPython_Register
 """
 
-import time
-import struct
+import digitalio
 import adafruit_bus_device.i2c_device as i2c_device
 from adafruit_register.i2c_struct import ROUnaryStruct, UnaryStruct
 from adafruit_register.i2c_bit import RWBit
@@ -45,8 +44,11 @@ _AW9523_REG_INTENABLE0 = const(0x06)  # Register for enabling interrupt
 _AW9523_REG_GCR = const(0x11)  # Register for general configuration
 _AW9523_REG_LEDMODE = const(0x12)  # Register for configuring const current
 
+# pylint: disable=invalid-name
+
 
 class AW9523:
+    """CircuitPython helper class for using the AW9523 GPIO expander"""
 
     _chip_id = ROUnaryStruct(_AW9523_REG_CHIPID, "<B")
     _reset_reg = UnaryStruct(_AW9523_REG_SOFTRESET, "<B")
@@ -77,9 +79,15 @@ class AW9523:
             self.directions = 0x0000  # all inputs!
 
     def reset(self):
+        """Perform a soft reset, check datasheets for post-reset defaults!"""
         self._reset_reg = 0
 
     def set_constant_current(self, pin, value):
+        """
+        Set the constant current drain for an AW9523 pin
+        :param int pin: pin to set constant current, 0..15
+        :param int value: the value ranging from 0 (off) to 255 (max current)
+        """
         # See Table 13. 256 step dimming control register
         if 0 <= pin <= 7:
             self._buffer[0] = 0x24 + pin
@@ -91,7 +99,7 @@ class AW9523:
             raise ValueError("Pin must be 0 to 15")
 
         # set value
-        if not (0 <= value <= 255):
+        if not 0 <= value <= 255:
             raise ValueError("Value must be 0 to 255")
         self._buffer[1] = value
         with self.i2c_device as i2c:
@@ -100,12 +108,14 @@ class AW9523:
     def get_pin(self, pin):
         """Convenience function to create an instance of the DigitalInOut class
         pointing at the specified pin of this AW9523 device.
+        :param int pin: pin to use for digital IO, 0 to 15
         """
         assert 0 <= pin <= 15
         return DigitalInOut(pin, self)
 
     @property
     def interrupt_enables(self):
+        """Enables interrupt for input pin change if bit mask is 1"""
         return ~self._interrupt_enables & 0xFFFF
 
     @interrupt_enables.setter
@@ -114,6 +124,7 @@ class AW9523:
 
     @property
     def directions(self):
+        """Direction is output if bit mask is 1, input if bit is 0"""
         return ~self._directions & 0xFFFF
 
     @directions.setter
@@ -122,6 +133,7 @@ class AW9523:
 
     @property
     def LED_modes(self):
+        """Pin is set up for constant current mode if bit mask is 1"""
         return ~self._LED_modes & 0xFFFF
 
     @LED_modes.setter
@@ -142,8 +154,6 @@ Digital input/output of the MCP230xx.
 
 * Author(s): Tony DiCola
 """
-
-import digitalio
 
 # Internal helpers to simplify setting and getting a bit inside an integer.
 def _get_bit(val, bit):
@@ -185,14 +195,13 @@ class DigitalInOut:
         self.direction = digitalio.Direction.OUTPUT
         self.value = value
 
-    def switch_to_input(self, pull=None, invert_polarity=False, **kwargs):
+    def switch_to_input(self, pull=None, **kwargs):
         """Switch the pin state to a digital input with the provided starting
         pull-up resistor state (optional, no pull-up by default) and input polarity.  Note that
         pull-down resistors are NOT supported!
         """
         self.direction = digitalio.Direction.INPUT
         self.pull = pull
-        self.invert_polarity = invert_polarity
 
     # pylint: enable=unused-argument
 
@@ -235,8 +244,8 @@ class DigitalInOut:
         """
         Pull-down resistors are NOT supported!
         """
-        raise ValueError("Pull-up/pull-down resistors not supported.")
+        raise NotImplementedError("Pull-up/pull-down resistors not supported.")
 
     @pull.setter
     def pull(self, val):
-        raise ValueError("Pull-up/pull-down resistors not supported.")
+        raise NotImplementedError("Pull-up/pull-down resistors not supported.")
