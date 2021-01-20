@@ -56,7 +56,7 @@ class AW9523:
     # Read all 16 gpio inputs
     inputs = UnaryStruct(_AW9523_REG_INPUT0, "<H")
     # Set all 16 gpio interrupt enable
-    _interrupt_enables = UnaryStruct(_AW9523_REG_CONFIG0, "<H")
+    _interrupt_enables = UnaryStruct(_AW9523_REG_INTENABLE0, "<H")
     # Set all 16 gpio directions
     _directions = UnaryStruct(_AW9523_REG_CONFIG0, "<H")
     # Set all 16 gpio LED modes
@@ -74,6 +74,7 @@ class AW9523:
         if reset:
             self.reset()
             self.port0_push_pull = True # pushpull output
+            self.interrupt_enables = 0x0000 # no IRQ
             self.directions = 0x0000 # all inputs!
 
     def reset(self):
@@ -94,7 +95,7 @@ class AW9523:
 
     @directions.setter
     def directions(self, dirs):
-       self._directions = ~dirs & 0xFFFF
+       self._directions = ((~dirs) & 0xFFFF)
 
     @property
     def LED_modes(self):
