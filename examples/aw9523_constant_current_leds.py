@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-import time
 import busio
 import board
 import adafruit_aw9523

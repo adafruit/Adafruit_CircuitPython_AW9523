@@ -2,10 +2,9 @@
 #
 # SPDX-License-Identifier: MIT
 
-import time
 import board
-import adafruit_aw9523
 import digitalio
+import adafruit_aw9523
 
 i2c = board.I2C()
 aw = adafruit_aw9523.AW9523(i2c)
