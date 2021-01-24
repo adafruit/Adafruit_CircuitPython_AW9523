@@ -247,6 +247,6 @@ class DigitalInOut:
         raise NotImplementedError("Pull-up/pull-down resistors not supported.")
 
     @pull.setter
-    def pull(self, val):
+    def pull(self, val): # pylint: disable=no-self-use
         if val is not None:
             raise NotImplementedError("Pull-up/pull-down resistors not supported.")
