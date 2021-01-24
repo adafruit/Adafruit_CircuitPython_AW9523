@@ -248,4 +248,5 @@ class DigitalInOut:
 
     @pull.setter
     def pull(self, val):
-        raise NotImplementedError("Pull-up/pull-down resistors not supported.")
+        if val is not None:
+            raise NotImplementedError("Pull-up/pull-down resistors not supported.")
