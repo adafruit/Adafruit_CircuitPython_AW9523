@@ -82,6 +82,11 @@ Usage Example
         led_pin.value = button_pin.value
 
 
+Documentation
+=============
+
+API documentation for this library can be found on `Read the Docs <https://circuitpython.readthedocs.io/projects/aw9523/en/latest/>`_.
+
 Contributing
 ============
 
