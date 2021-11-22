@@ -250,3 +250,8 @@ class DigitalInOut:
     def pull(self, val):  # pylint: disable=no-self-use
         if val is not None:
             raise NotImplementedError("Pull-up/pull-down resistors not supported.")
+
+    def deinit(self):
+        """ Deinitialize the Digital Pin """
+        self.switch_to_output()
+        del self._pin
