@@ -253,5 +253,5 @@ class DigitalInOut:
 
     def deinit(self):
         """ Deinitialize the Digital Pin """
+	# Don't actually destroy this object, just reset the pin to output, which is defaut.
         self.switch_to_output()
-        del self._pin
