@@ -29,6 +29,7 @@ import digitalio
 from adafruit_bus_device import i2c_device
 from adafruit_register.i2c_struct import ROUnaryStruct, UnaryStruct
 from adafruit_register.i2c_bit import RWBit
+from adafruit_register.i2c_bits import RWBits
 from micropython import const
 
 __version__ = "0.0.0-auto.0"
@@ -45,6 +46,12 @@ _AW9523_REG_GCR = const(0x11)  # Register for general configuration
 _AW9523_REG_LEDMODE = const(0x12)  # Register for configuring const current
 
 # pylint: disable=invalid-name
+
+# constant_current_range options
+AW9523_4_4_RANGE = const(0)  # Full range: 0 - 37   mA (typical)
+AW9523_3_4_RANGE = const(1)  # 3/4  range: 0 - 27.8 mA
+AW9523_2_4_RANGE = const(2)  # 2/4  range: 0 - 18.5 mA
+AW9523_1_4_RANGE = const(3)  # 1/4  range: 0 -  9.3 mA
 
 
 class AW9523:
@@ -66,6 +73,9 @@ class AW9523:
 
     # Whether port 0 is push-pull
     port0_push_pull = RWBit(_AW9523_REG_GCR, 4)
+
+    # 256-step constant-current range selector 'ISEL' - choice of 'full' (4/4), 3/4, 2/4, or 1/4.
+    constant_current_range = RWBits(2, _AW9523_REG_GCR, 0)
 
     def __init__(self, i2c_bus, address=_AW9523_DEFAULT_ADDR, reset=True):
         self.i2c_device = i2c_device.I2CDevice(i2c_bus, address)
