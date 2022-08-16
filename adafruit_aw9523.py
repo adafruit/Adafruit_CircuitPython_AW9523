@@ -32,7 +32,7 @@ from adafruit_register.i2c_bit import RWBit
 from adafruit_register.i2c_bits import RWBits
 from micropython import const
 
-__version__ = "0.0.0-auto.0"
+__version__ = "0.0.0+auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_AW9523.git"
 
 _AW9523_DEFAULT_ADDR = const(0x58)
