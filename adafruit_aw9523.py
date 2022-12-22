@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: Copyright (c) 2021 ladyada for Adafruit
+# SPDX-FileCopyrightText: Copyright (c) 2021 ladyada for Adafruit
 #
 # SPDX-License-Identifier: MIT
 """
@@ -31,6 +32,12 @@ from adafruit_register.i2c_struct import ROUnaryStruct, UnaryStruct
 from adafruit_register.i2c_bit import RWBit
 from adafruit_register.i2c_bits import RWBits
 from micropython import const
+
+try:
+    from typing import Optional
+    from busio import I2C
+except ImportError:
+    pass
 
 __version__ = "0.0.0+auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_AW9523.git"
@@ -77,7 +84,9 @@ class AW9523:
     # 256-step constant-current range selector 'ISEL' - choice of 'full' (4/4), 3/4, 2/4, or 1/4.
     constant_current_range = RWBits(2, _AW9523_REG_GCR, 0)
 
-    def __init__(self, i2c_bus, address=_AW9523_DEFAULT_ADDR, reset=True):
+    def __init__(
+        self, i2c_bus: I2C, address: int = _AW9523_DEFAULT_ADDR, reset: bool = True
+    ) -> None:
         self.i2c_device = i2c_device.I2CDevice(i2c_bus, address)
         self._buffer = bytearray(2)
         if self._chip_id != 0x23:
@@ -88,11 +97,11 @@ class AW9523:
             self.interrupt_enables = 0x0000  # no IRQ
             self.directions = 0x0000  # all inputs!
 
-    def reset(self):
+    def reset(self) -> None:
         """Perform a soft reset, check datasheets for post-reset defaults!"""
         self._reset_reg = 0
 
-    def set_constant_current(self, pin, value):
+    def set_constant_current(self, pin: int, value: int) -> None:
         """
         Set the constant current drain for an AW9523 pin
         :param int pin: pin to set constant current, 0..15
@@ -115,7 +124,7 @@ class AW9523:
         with self.i2c_device as i2c:
             i2c.write(self._buffer)
 
-    def get_pin(self, pin):
+    def get_pin(self, pin: int) -> "DigitalInOut":
         """Convenience function to create an instance of the DigitalInOut class
         pointing at the specified pin of this AW9523 device.
         :param int pin: pin to use for digital IO, 0 to 15
@@ -124,30 +133,30 @@ class AW9523:
         return DigitalInOut(pin, self)
 
     @property
-    def interrupt_enables(self):
+    def interrupt_enables(self) -> int:
         """Enables interrupt for input pin change if bit mask is 1"""
         return ~self._interrupt_enables & 0xFFFF
 
     @interrupt_enables.setter
-    def interrupt_enables(self, enables):
+    def interrupt_enables(self, enables: int) -> None:
         self._interrupt_enables = ~enables & 0xFFFF
 
     @property
-    def directions(self):
+    def directions(self) -> int:
         """Direction is output if bit mask is 1, input if bit is 0"""
         return ~self._directions & 0xFFFF
 
     @directions.setter
-    def directions(self, dirs):
+    def directions(self, dirs) -> None:
         self._directions = (~dirs) & 0xFFFF
 
     @property
-    def LED_modes(self):
+    def LED_modes(self) -> int:
         """Pin is set up for constant current mode if bit mask is 1"""
         return ~self._LED_modes & 0xFFFF
 
     @LED_modes.setter
-    def LED_modes(self, modes):
+    def LED_modes(self, modes) -> None:
         self._LED_modes = ~modes & 0xFFFF
 
 
@@ -166,15 +175,15 @@ Digital input/output of the MCP230xx.
 """
 
 # Internal helpers to simplify setting and getting a bit inside an integer.
-def _get_bit(val, bit):
+def _get_bit(val: bool, bit: int) -> bool:
     return val & (1 << bit) > 0
 
 
-def _enable_bit(val, bit):
+def _enable_bit(val: bool, bit: int) -> int:
     return val | (1 << bit)
 
 
-def _clear_bit(val, bit):
+def _clear_bit(val: bool, bit: int) -> int:
     return val & ~(1 << bit)
 
 
@@ -188,7 +197,7 @@ class DigitalInOut:
     configurations.
     """
 
-    def __init__(self, pin_number, aw):
+    def __init__(self, pin_number: int, aw: "AW9523") -> None:
         """Specify the pin number of the AW9523 0..15, and instance."""
         self._pin = pin_number
         self._aw = aw
@@ -198,14 +207,14 @@ class DigitalInOut:
     # is unused by this class).  Do not remove them, instead turn off pylint
     # in this case.
     # pylint: disable=unused-argument
-    def switch_to_output(self, value=False, **kwargs):
+    def switch_to_output(self, value: bool = False, **kwargs) -> None:
         """Switch the pin state to a digital output with the provided starting
         value (True/False for high or low, default is False/low).
         """
         self.direction = digitalio.Direction.OUTPUT
         self.value = value
 
-    def switch_to_input(self, pull=None, **kwargs):
+    def switch_to_input(self, pull: Optional[bool] = None, **kwargs) -> None:
         """Switch the pin state to a digital input with the provided starting
         pull-up resistor state (optional, no pull-up by default) and input polarity.  Note that
         pull-down resistors are NOT supported!
@@ -216,7 +225,7 @@ class DigitalInOut:
     # pylint: enable=unused-argument
 
     @property
-    def value(self):
+    def value(self) -> bool:
         """The value of the pin, either True for high or False for
         low.  Note you must configure as an output or input appropriately
         before reading and writing this value.
@@ -224,14 +233,14 @@ class DigitalInOut:
         return _get_bit(self._aw.inputs, self._pin)
 
     @value.setter
-    def value(self, val):
+    def value(self, val: bool) -> None:
         if val:
             self._aw.outputs = _enable_bit(self._aw.outputs, self._pin)
         else:
             self._aw.outputs = _clear_bit(self._aw.outputs, self._pin)
 
     @property
-    def direction(self):
+    def direction(self) -> bool:
         """The direction of the pin, either True for an input or
         False for an output.
         """
@@ -240,7 +249,7 @@ class DigitalInOut:
         return digitalio.Direction.OUTPUT
 
     @direction.setter
-    def direction(self, val):
+    def direction(self, val: bool) -> None:
         if val == digitalio.Direction.INPUT:
             self._aw.directions = _clear_bit(self._aw.directions, self._pin)
 
@@ -250,13 +259,13 @@ class DigitalInOut:
             raise ValueError("Expected INPUT or OUTPUT direction!")
 
     @property
-    def pull(self):
+    def pull(self) -> None:
         """
         Pull-down resistors are NOT supported!
         """
         raise NotImplementedError("Pull-up/pull-down resistors not supported.")
 
     @pull.setter
-    def pull(self, val):  # pylint: disable=no-self-use
+    def pull(self, val) -> None:  # pylint: disable=no-self-use
         if val is not None:
             raise NotImplementedError("Pull-up/pull-down resistors not supported.")
