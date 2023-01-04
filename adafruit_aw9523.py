@@ -1,5 +1,4 @@
 # SPDX-FileCopyrightText: Copyright (c) 2021 ladyada for Adafruit
-# SPDX-FileCopyrightText: Copyright (c) 2021 ladyada for Adafruit
 #
 # SPDX-License-Identifier: MIT
 """
@@ -147,7 +146,7 @@ class AW9523:
         return ~self._directions & 0xFFFF
 
     @directions.setter
-    def directions(self, dirs) -> None:
+    def directions(self, dirs: int) -> None:
         self._directions = (~dirs) & 0xFFFF
 
     @property
@@ -156,7 +155,7 @@ class AW9523:
         return ~self._LED_modes & 0xFFFF
 
     @LED_modes.setter
-    def LED_modes(self, modes) -> None:
+    def LED_modes(self, modes: int) -> None:
         self._LED_modes = ~modes & 0xFFFF
 
 
