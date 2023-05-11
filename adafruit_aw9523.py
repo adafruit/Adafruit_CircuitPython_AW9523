@@ -173,6 +173,7 @@ Digital input/output of the MCP230xx.
 * Author(s): Tony DiCola
 """
 
+
 # Internal helpers to simplify setting and getting a bit inside an integer.
 def _get_bit(val: bool, bit: int) -> bool:
     return val & (1 << bit) > 0
