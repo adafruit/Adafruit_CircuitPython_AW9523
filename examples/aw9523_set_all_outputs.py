@@ -3,8 +3,10 @@
 # SPDX-License-Identifier: MIT
 
 import time
-import busio
+
 import board
+import busio
+
 import adafruit_aw9523
 
 i2c = busio.I2C(board.SCL, board.SDA)

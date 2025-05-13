@@ -4,6 +4,7 @@
 
 import board
 import digitalio
+
 import adafruit_aw9523
 
 i2c = board.I2C()  # uses board.SCL and board.SDA
