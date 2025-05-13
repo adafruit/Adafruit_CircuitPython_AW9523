@@ -3,8 +3,10 @@
 # SPDX-License-Identifier: MIT
 
 import time
-import busio
+
 import board
+import busio
+
 import adafruit_aw9523
 
 i2c = busio.I2C(board.SCL, board.SDA)
@@ -16,5 +18,5 @@ aw.directions = 0x0000
 
 while True:
     # read all input bits and print them out as binary 0/1
-    print("Inputs: {:016b}".format(aw.inputs))
+    print(f"Inputs: {aw.inputs:016b}")
     time.sleep(0.1)

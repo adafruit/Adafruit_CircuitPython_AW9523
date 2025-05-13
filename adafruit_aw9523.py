@@ -27,13 +27,14 @@ Implementation Notes
 
 import digitalio
 from adafruit_bus_device import i2c_device
-from adafruit_register.i2c_struct import ROUnaryStruct, UnaryStruct
 from adafruit_register.i2c_bit import RWBit
 from adafruit_register.i2c_bits import RWBits
+from adafruit_register.i2c_struct import ROUnaryStruct, UnaryStruct
 from micropython import const
 
 try:
     from typing import Optional
+
     from busio import I2C
 except ImportError:
     pass
@@ -50,8 +51,6 @@ _AW9523_REG_CONFIG0 = const(0x04)  # Register for configuring direction
 _AW9523_REG_INTENABLE0 = const(0x06)  # Register for enabling interrupt
 _AW9523_REG_GCR = const(0x11)  # Register for general configuration
 _AW9523_REG_LEDMODE = const(0x12)  # Register for configuring const current
-
-# pylint: disable=invalid-name
 
 # constant_current_range options
 AW9523_4_4_RANGE = const(0)  # Full range: 0 - 37   mA (typical)
@@ -204,9 +203,7 @@ class DigitalInOut:
 
     # kwargs in switch functions below are _necessary_ for compatibility
     # with DigitalInout class (which allows specifying pull, etc. which
-    # is unused by this class).  Do not remove them, instead turn off pylint
-    # in this case.
-    # pylint: disable=unused-argument
+    # is unused by this class).  Do not remove them.
     def switch_to_output(self, value: bool = False, **kwargs) -> None:
         """Switch the pin state to a digital output with the provided starting
         value (True/False for high or low, default is False/low).
@@ -221,8 +218,6 @@ class DigitalInOut:
         """
         self.direction = digitalio.Direction.INPUT
         self.pull = pull
-
-    # pylint: enable=unused-argument
 
     @property
     def value(self) -> bool:
@@ -266,6 +261,6 @@ class DigitalInOut:
         raise NotImplementedError("Pull-up/pull-down resistors not supported.")
 
     @pull.setter
-    def pull(self, val) -> None:  # pylint: disable=no-self-use
+    def pull(self, val) -> None:  # noqa: PLR6301
         if val is not None:
             raise NotImplementedError("Pull-up/pull-down resistors not supported.")
